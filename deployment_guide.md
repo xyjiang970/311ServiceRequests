@@ -68,6 +68,62 @@ cd ..
 # Lambda → 311-data-collector → Upload from → .zip file → lambda_deployment.zip
 ```
 
+Step-by-Step: Lambda Layer Method
+
+1. Create minimal package
+
+```bash
+# In PowerShell (in your project directory)
+Remove-Item -Recurse -Force lambda_package -ErrorAction SilentlyContinue
+New-Item -ItemType Directory -Name lambda_package
+
+# Install only requests (boto3 is already in Lambda)
+pip install --target lambda_package requests
+
+# Copy your Lambda function
+Copy-Item lambda_function.py lambda_package/
+
+# Create ZIP
+Compress-Archive -Path lambda_package\* -DestinationPath lambda_deployment_minimal.zip -Force
+
+# Check size
+(Get-Item lambda_deployment_minimal.zip).Length / 1MB
+# Should show ~2 MB
+```
+
+2. Upload to Lambda
+
+Console method:
+
+- Lambda → 311-data-collector → Code tab
+- Upload from → .zip file
+- Select lambda_deployment_minimal.zip
+- Click Save
+
+3. Add AWS Data Wrangler Layer
+
+Still in Lambda Console
+
+- Configuration tab → Layers
+- Click "Add a layer"
+- Choose "Specify an ARN"
+- Paste: arn:aws:lambda:us-east-1:336392948345:layer:AWSSDKPandas-Python312:13
+- Click "Add"
+
+4. Test
+
+- Test tab → Create new test event
+- Event name: test-initial-load
+- Event JSON:
+
+```json
+{
+  "force_initial_load": true,
+  "max_records": 100,
+  "initial_lookback_days": 7
+}
+```
+
 **Configure Lambda:**
 
 - Memory: 1024 MB
