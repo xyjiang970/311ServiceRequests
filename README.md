@@ -1,3 +1,15 @@
 # 311ServiceRequests
 
-Main dataset: [311 Service Requests Data](https://data.cityofnewyork.us/Social-Services/311-Service-Requests-from-2020-to-Present/erm2-nwe9/about_data)
+Dataset Used: [311 Service Requests Data](https://data.cityofnewyork.us/Social-Services/311-Service-Requests-from-2020-to-Present/erm2-nwe9/about_data)
+
+Main goal of this project is to set up a end to end, automatic ETL pipeline collecting data (from the past year) from data.cityofnewyork.us domain API (note data is updated daily - but there will still be lag in date complaint was first filed) to Streamlit.io front end.
+
+EDA Qs:
+
+1. Top Complaints by complaint type
+2. Top Complaint Agency (city Dept. reported to)
+3. Most # of Complaints by Borough
+4. Most # of Complaints by Zip-Code
+5. Top Complaints in a certain zip code (zip code search function)
+6. Repeated complaints from same address
+7. Heatmap of complaints of NYC (dist. of complaints across the city)
