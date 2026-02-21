@@ -13,3 +13,5 @@ EDA Qs:
 5. Top Complaints in a certain zip code (zip code search function)
 6. Repeated complaints from same address
 7. Heatmap of complaints of NYC (dist. of complaints across the city)
+
+[Map from .ipynb file](https://xyjiang970.github.io/311ServiceRequests/my_map.html)
