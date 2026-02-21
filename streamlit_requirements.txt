@@ -1,0 +1,10 @@
+# Streamlit requirements.txt
+
+streamlit==1.31.0
+pandas==2.2.0
+plotly==5.18.0
+pyathena==3.5.0
+folium==0.15.1
+streamlit-folium==0.16.0
+boto3==1.34.0
+numpy==1.26.3

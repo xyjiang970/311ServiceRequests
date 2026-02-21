@@ -15,3 +15,17 @@ EDA Qs:
 7. Heatmap of complaints of NYC (dist. of complaints across the city)
 
 [Map from .ipynb file](https://xyjiang970.github.io/311ServiceRequests/my_map.html)
+
+## ETL Architecture:
+
+NYC Open Data API -> AWS Lambda (scheduled) -> S3 (parquet files) -> AWS Athena -> Streamlit.io
+
+Pipeline will:
+
+- Pull data daily from NYC API (automated with EventBridge)
+- Store as Parquet with year/month partitioning (10x compression vs JSON)
+- Query via SQL in Athena (no data warehouse setup)
+- Display in Streamlit.io
+- Cost: ~$12-15/month for 1M records
+
+---
