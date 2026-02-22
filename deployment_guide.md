@@ -120,7 +120,8 @@ Still in Lambda Console
 {
   "force_initial_load": true,
   "max_records": 100,
-  "initial_lookback_days": 7
+  "initial_lookback_days": 30,
+  "test_end_date": "2025-01-31"
 }
 ```
 
@@ -160,8 +161,10 @@ aws lambda create-function \
 Event name: test-incremental
 Event JSON:
 {
-  "mode": "incremental",
-  "days_back": 7
+  "force_initial_load": true,
+  "max_records": 100,
+  "initial_lookback_days": 30,
+  "test_end_date": "2025-01-31"
 }
 
 # Click Test
@@ -197,6 +200,99 @@ Configure input: Constant (JSON text)
 - **Daily runs**: State file exists → fetches only new records since last run (max 10K)
 - See `INCREMENTAL_LOADING_CHANGES.md` for detailed logic
 
+Step 1: Define Rule Detail
+
+Name: Enter 311-daily-ingestion
+Description (optional): Daily 311 data collection on weekdays at 6 AM ET
+Event bus: Leave as default
+Rule type: Select Schedule
+Click Next
+
+Step 2: Define Schedule
+
+Schedule pattern: Select A schedule that runs at a regular rate, such as every 10 minutes
+
+Wait, actually select A fine-grained schedule that runs at a specific time, such as 8:00 a.m. PST on the first Monday of every month
+
+Cron expression: Select the Cron-based schedule option
+In the cron expression field, enter:
+
+cron(0 11 ? \* MON-FRI \*)
+
+Timezone: Leave as UTC (this is required for cron expressions)
+You should see preview dates showing when it will run next
+Click Next
+
+Step 3: Select Targets
+
+Target types: Select AWS service
+Select a target:
+
+Click the dropdown
+Select Lambda function
+
+Function:
+
+Click the dropdown
+Select 311-data-collector (your Lambda function name)
+
+Additional settings (scroll down):
+
+Expand Additional settings
+Under Configure target input, select Constant (JSON text)
+In the text box, paste:
+
+```json
+{
+  "max_records": 10000
+}
+```
+
+Click Next
+
+Step 4: Configure Tags (Optional)
+
+(Optional) Add tags:
+
+Key: Environment → Value: Production
+Key: Project → Value: 311-Analytics
+
+Click Next
+
+Step 5: Review and Create
+
+Review all settings:
+
+Name: 311-daily-ingestion
+Schedule: cron(0 11 ? \* MON-FRI \*)
+Target: Lambda function 311-data-collector
+Input: JSON with max_records
+
+Click Create rule
+
+Verify the Rule
+
+You should see a success message: "Successfully created rule 311-daily-ingestion"
+The rule will appear in your Rules list with:
+
+State: Enabled (green checkmark)
+Type: Schedule
+Schedule expression: cron(0 11 ? \* MON-FRI \*)
+
+Test the Rule Manually (Optional)
+
+Click on the rule name 311-daily-ingestion
+Click the Test button (top right)
+Confirm the test - this will immediately trigger your Lambda function
+Check your Lambda function logs in CloudWatch to verify it ran successfully
+
+Monitoring
+To see when the rule triggers:
+
+Go to CloudWatch → Logs → Log groups
+Find /aws/lambda/311-data-collector
+Check logs around 6 AM ET on weekdays (11 AM UTC)
+
 ---
 
 ## Phase 2: Athena Setup
@@ -226,6 +322,39 @@ SELECT COUNT(*) FROM nyc_311.service_requests_311;
 -- Sample query
 SELECT * FROM nyc_311.service_requests_311 LIMIT 10;
 ```
+
+Step 1: Navigate to Athena
+
+Log into AWS Console
+Search for "Athena" in the top search bar
+Click Amazon Athena
+If this is your first time, you may see a "Get Started" page - click Get Started or Explore the query editor
+
+Step 2: Set Query Result Location
+
+Click Settings (top right) or the Settings tab
+Click Manage
+Under Location of query result:
+
+Enter: s3://311-athena-results-[your-name]/
+
+Click Save
+
+Step 3: Create Database
+
+Go back to the Query Editor tab
+Make sure you're in the Editor view (left sidebar)
+In the query window, paste:
+
+```sql
+CREATE DATABASE IF NOT EXISTS nyc_311_db
+COMMENT '311 Service Requests Database'
+LOCATION 's3://311-processed-data-jason/';
+```
+
+Click Run (or press Ctrl+Enter / Cmd+Enter)
+You should see: "Query successful"
+In the Database dropdown (left sidebar), select nyc_311_db
 
 ---
 
