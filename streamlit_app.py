@@ -28,7 +28,8 @@ def get_athena_connection():
         s3_staging_dir=st.secrets["aws"]["s3_staging_dir"],
         region_name=st.secrets["aws"]["region"],
         aws_access_key_id=st.secrets["aws"]["access_key_id"],
-        aws_secret_access_key=st.secrets["aws"]["secret_access_key"]
+        aws_secret_access_key=st.secrets["aws"]["secret_access_key"],
+        schema_name='nyc_311'
     )
     return conn
 
