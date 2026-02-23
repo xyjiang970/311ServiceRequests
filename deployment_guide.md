@@ -36,6 +36,7 @@ Block all public access: Yes
 # Permissions: Attach policies
 # - AmazonS3FullAccess (or create custom policy with just your buckets)
 # - AWSLambdaBasicExecutionRole
+# - AmazonAthenaFullAccess
 
 Role name: Lambda-311-DataCollector-Role
 ```
