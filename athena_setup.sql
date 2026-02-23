@@ -4,7 +4,7 @@
 -- 1. Create database (if not exists)
 CREATE DATABASE IF NOT EXISTS nyc_311
 COMMENT '311 Service Requests Database'
-LOCATION 's3://311-processed-data-jason/';
+LOCATION 's3://311-processed-data-jason/processed/';
 
 -- 2. Create external table pointing to S3 Parquet files
 CREATE EXTERNAL TABLE IF NOT EXISTS nyc_311.service_requests_311 (
@@ -34,8 +34,7 @@ CREATE EXTERNAL TABLE IF NOT EXISTS nyc_311.service_requests_311 (
 )
 PARTITIONED BY (
     year STRING,
-    month STRING,
-    day STRING
+    month STRING
 )
 STORED AS PARQUET
 LOCATION 's3://311-processed-data-jason/processed/'
