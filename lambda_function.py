@@ -249,6 +249,29 @@ def convert_and_save_parquet(data, date_str):
     except Exception as e:
         logger.error(f"Error converting to Parquet: {e}")
         return False
+    
+
+def update_athena_partitions():
+    """Update Athena table with new partitions"""
+    try:
+        athena_client = boto3.client('athena')
+        
+        query = "MSCK REPAIR TABLE nyc_311.service_requests_311;"
+        
+        response = athena_client.start_query_execution(
+            QueryString=query,
+            QueryExecutionContext={'Database': 'nyc_311'},
+            ResultConfiguration={
+                'OutputLocation': 's3://311-athena-results-jason/'
+            }
+        )
+        
+        logger.info(f"Started Athena partition repair: {response['QueryExecutionId']}")
+        return True
+        
+    except Exception as e:
+        logger.error(f"Error updating Athena partitions: {e}")
+        return False
 
 
 def lambda_handler(event, context):
@@ -352,6 +375,9 @@ def lambda_handler(event, context):
         success = convert_and_save_parquet(raw_data, today_str)
         
         if success:
+             # Update Athena partitions
+            update_athena_partitions()
+
             # Update last run timestamp
             save_last_run_timestamp(current_run_str)
             

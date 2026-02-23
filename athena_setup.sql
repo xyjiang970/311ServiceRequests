@@ -48,8 +48,8 @@ MSCK REPAIR TABLE nyc_311.service_requests_311;
 
 -- Alternative: Manual partition addition (if MSCK doesn't work)
 -- ALTER TABLE nyc_311.service_requests_311 
--- ADD PARTITION (year='2025', month='02', day='21') 
--- LOCATION 's3://311-processed-data-jason/processed/year=2025/month=02/day=21/';
+-- ADD PARTITION (year='2025', month='02') 
+-- LOCATION 's3://311-processed-data-jason/processed/year=2025/month=02/';
 
 -- 4. Test queries
 -- Count total records
@@ -57,10 +57,10 @@ SELECT COUNT(*) as total_records
 FROM nyc_311.service_requests_311;
 
 -- Count by partition
-SELECT year, month, day, COUNT(*) as count
+SELECT year, month, COUNT(*) as count
 FROM nyc_311.service_requests_311
-GROUP BY year, month, day
-ORDER BY year, month, day;
+GROUP BY year, month
+ORDER BY year, month
 
 -- Sample data
 SELECT *
