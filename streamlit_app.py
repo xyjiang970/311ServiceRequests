@@ -45,7 +45,7 @@ def run_query(sql):
 # Title and description
 st.title("🏙️ NYC 311 Service Requests Dashboard")
 st.markdown("""
-Analyzing service requests from the past year across all five boroughs.
+Analyzing service requests across all five boroughs.
 Data refreshed daily from [NYC Open Data](https://data.cityofnewyork.us/).
 """)
 
@@ -90,7 +90,7 @@ where_clause = " AND ".join(where_clauses) if where_clauses else "1=1"
 # ===== METRICS ROW =====
 st.header("📊 Key Metrics")
 
-col1, col2, col3, col4 = st.columns(4)
+col1, col2, col3 = st.columns(3)
 
 # Total complaints
 total_query = f"""
@@ -110,9 +110,6 @@ open_query = f"""
 open_complaints = run_query(open_query)['open_count'].iloc[0]
 col2.metric("Open/In Progress", f"{open_complaints:,}")
 
-# Avg resolution time - Not applicable (only tracking Open/In Progress)
-col3.metric("Avg Resolution Time", "N/A")
-
 # Most common complaint
 common_query = f"""
     SELECT complaint_type, COUNT(*) as count
@@ -124,9 +121,9 @@ common_query = f"""
 """
 common_complaint = run_query(common_query)
 if not common_complaint.empty:
-    col4.metric("Top Complaint Type", common_complaint['complaint_type'].iloc[0])
+    col3.metric("Top Complaint Type", common_complaint['complaint_type'].iloc[0])
 else:
-    col4.metric("Top Complaint Type", "N/A")
+    col3.metric("Top Complaint Type", "N/A")
 
 # ===== Q1: TOP COMPLAINTS BY TYPE =====
 st.header("📋 Top Complaint Types")
