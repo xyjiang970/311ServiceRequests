@@ -101,7 +101,7 @@ total_query = f"""
 total_complaints = run_query(total_query)['total'].iloc[0]
 col1.metric("Total Complaints", f"{total_complaints:,}")
 
-# Open & In Progress complaints
+# Open & In Progress complaints (same as total since we only track these)
 open_query = f"""
     SELECT COUNT(*) as open_count
     FROM service_requests_311
@@ -110,21 +110,8 @@ open_query = f"""
 open_complaints = run_query(open_query)['open_count'].iloc[0]
 col2.metric("Open/In Progress", f"{open_complaints:,}")
 
-# Avg response time (for closed complaints)
-# response_query = f"""
-#     SELECT AVG(date_diff('day', created_date, closed_date)) as avg_days
-#     FROM service_requests_311
-#     WHERE {where_clause} 
-#     AND status = 'Closed' 
-#     AND closed_date IS NOT NULL
-# """
-
-avg_response = run_query(response_query)
-if not avg_response.empty and pd.notna(avg_response['avg_days'].iloc[0]):
-    avg_days = avg_response['avg_days'].iloc[0]
-    col3.metric("Avg Resolution Time", f"{avg_days:.1f} days")
-else:
-    col3.metric("Avg Resolution Time", "N/A")
+# Avg resolution time - Not applicable (only tracking Open/In Progress)
+col3.metric("Avg Resolution Time", "N/A")
 
 # Most common complaint
 common_query = f"""
