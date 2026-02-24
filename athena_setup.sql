@@ -10,6 +10,7 @@ LOCATION 's3://311-processed-data-jason/processed/';
 CREATE EXTERNAL TABLE IF NOT EXISTS nyc_311.service_requests_311 (
     unique_key STRING,
     created_date TIMESTAMP,
+    closed_date TIMESTAMP,
     agency STRING,
     agency_name STRING,
     complaint_type STRING,

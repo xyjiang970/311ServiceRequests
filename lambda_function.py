@@ -217,6 +217,12 @@ def convert_and_save_parquet(data, date_str):
         for col in numeric_columns:
             if col in df.columns:
                 df[col] = pd.to_numeric(df[col], errors='coerce')
+
+        # Convert location dict/object to JSON string
+        if 'location' in df.columns:
+            df['location'] = df['location'].apply(
+                lambda x: json.dumps(x) if isinstance(x, (dict, list)) else str(x) if pd.notna(x) else None
+            )
         
         # Add partition columns
         df['year'] = df['created_date'].dt.year
