@@ -69,8 +69,8 @@ boroughs = st.sidebar.multiselect(
 # Status filter
 status_filter = st.sidebar.multiselect(
     "Status",
-    options=['Open', 'In Progress', 'Closed'],
-    default=['Open', 'In Progress', 'Closed']
+    options=['Open', 'In Progress'],
+    default=['Open', 'In Progress']
 )
 
 # Build WHERE clause for filters
