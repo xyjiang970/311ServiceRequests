@@ -90,7 +90,7 @@ where_clause = " AND ".join(where_clauses) if where_clauses else "1=1"
 # ===== METRICS ROW =====
 st.header("📊 Key Metrics")
 
-col1, col2, col3 = st.columns(3)
+col1, col2 = st.columns(3)
 
 # Total complaints
 total_query = f"""
@@ -100,15 +100,6 @@ total_query = f"""
 """
 total_complaints = run_query(total_query)['total'].iloc[0]
 col1.metric("Total Complaints", f"{total_complaints:,}")
-
-# Open & In Progress complaints (same as total since we only track these)
-open_query = f"""
-    SELECT COUNT(*) as open_count
-    FROM service_requests_311
-    WHERE {where_clause} AND status IN ('Open', 'In Progress')
-"""
-open_complaints = run_query(open_query)['open_count'].iloc[0]
-col2.metric("Open/In Progress", f"{open_complaints:,}")
 
 # Most common complaint
 common_query = f"""
@@ -121,9 +112,9 @@ common_query = f"""
 """
 common_complaint = run_query(common_query)
 if not common_complaint.empty:
-    col3.metric("Top Complaint Type", common_complaint['complaint_type'].iloc[0])
+    col2.metric("Top Complaint Type", common_complaint['complaint_type'].iloc[0])
 else:
-    col3.metric("Top Complaint Type", "N/A")
+    col2.metric("Top Complaint Type", "N/A")
 
 # ===== Q1: TOP COMPLAINTS BY TYPE =====
 st.header("📋 Top Complaint Types")
@@ -231,13 +222,20 @@ with col1:
     """
     df_zip = run_query(zip_query)
     
+    # Convert zip codes to strings for categorical display
+    df_zip['incident_zip'] = df_zip['incident_zip'].astype(str)
+    
+    # Create horizontal bar chart (better for descending display)
     fig_zip = px.bar(
         df_zip,
-        x='incident_zip',
-        y='count',
+        x='count',
+        y='incident_zip',
+        orientation='h',
         title='Top 15 Zip Codes',
-        labels={'count': 'Complaints', 'incident_zip': 'Zip Code'}
+        labels={'count': 'Number of Complaints', 'incident_zip': 'Zip Code'}
     )
+    # Keep descending order (highest at top)
+    fig_zip.update_layout(yaxis={'categoryorder': 'total ascending'})
     st.plotly_chart(fig_zip, use_container_width=True)
 
 with col2:

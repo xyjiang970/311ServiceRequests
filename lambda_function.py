@@ -197,10 +197,11 @@ def save_to_s3_raw(data, date_str):
 def convert_and_save_parquet(data, date_str):
     """
     Convert JSON data to Parquet and save to S3 with partitioning
+    Returns: (success: bool, max_created_date: str)
     """
     if not data:
         logger.warning("No data to convert")
-        return False
+        return False, None
     
     try:
         # Create DataFrame
@@ -211,6 +212,10 @@ def convert_and_save_parquet(data, date_str):
         for col in date_columns:
             if col in df.columns:
                 df[col] = pd.to_datetime(df[col], errors='coerce')
+        
+        # Get the maximum created_date from actual data
+        max_created_date = df['created_date'].max()
+        max_created_date_str = max_created_date.isoformat() if pd.notna(max_created_date) else None
         
         # Convert numeric columns
         numeric_columns = ['latitude', 'longitude']
@@ -250,12 +255,12 @@ def convert_and_save_parquet(data, date_str):
             
             logger.info(f"Saved {len(group_df)} records to s3://{S3_PROCESSED_BUCKET}/{key}")
         
-        return True
+        return True, max_created_date_str
         
     except Exception as e:
         logger.error(f"Error converting to Parquet: {e}")
-        return False
-    
+        return False, None
+
 
 def update_athena_partitions():
     """Update Athena table with new partitions"""
@@ -378,14 +383,17 @@ def lambda_handler(event, context):
         save_to_s3_raw(raw_data, today_str)
         
         # Convert and save as Parquet
-        success = convert_and_save_parquet(raw_data, today_str)
+        success, max_created_date = convert_and_save_parquet(raw_data, today_str)
         
         if success:
              # Update Athena partitions
             update_athena_partitions()
 
-            # Update last run timestamp
-            save_last_run_timestamp(current_run_str)
+             # Save the MAX created_date from actual data (not Lambda execution time)
+            timestamp_to_save = max_created_date if max_created_date else current_run_str
+            save_last_run_timestamp(timestamp_to_save)
+
+            logger.info(f"Saved timestamp: {timestamp_to_save} (max created_date from data)")
             
             return {
                 'statusCode': 200,
@@ -394,6 +402,7 @@ def lambda_handler(event, context):
                     'records': len(raw_data),
                     'mode': 'initial' if last_run_timestamp is None else 'incremental',
                     'date_range': f'{start_date_str} to {end_date_str}',
+                    'max_data_timestamp': timestamp_to_save,
                     'timestamp': current_run_str
                 })
             }
