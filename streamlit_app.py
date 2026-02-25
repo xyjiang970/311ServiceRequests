@@ -90,7 +90,7 @@ where_clause = " AND ".join(where_clauses) if where_clauses else "1=1"
 # ===== METRICS ROW =====
 st.header("📊 Key Metrics")
 
-col1, col2 = st.columns(3)
+col1, col2 = st.columns(2)
 
 # Total complaints
 total_query = f"""
