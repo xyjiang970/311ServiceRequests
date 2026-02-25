@@ -55,7 +55,7 @@ st.sidebar.header("Filters")
 # Date range filter
 date_range = st.sidebar.date_input(
     "Select Date Range",
-    value=(pd.Timestamp.now() - pd.Timedelta(days=30), pd.Timestamp.now()),
+    value=(pd.Timestamp.now() - pd.Timedelta(days=365), pd.Timestamp.now()),
     key="date_range"
 )
 
