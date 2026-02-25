@@ -209,33 +209,66 @@ st.header("📍 Zip Code Analysis")
 col1, col2 = st.columns([1, 1])
 
 with col1:
-    # Top zip codes
+    # Top zip codes with borough info
     zip_query = f"""
         SELECT 
             incident_zip,
+            borough,
             COUNT(*) as count
         FROM service_requests_311
-        WHERE {where_clause} AND incident_zip IS NOT NULL
-        GROUP BY incident_zip
-        ORDER BY count DESC
-        LIMIT 15
+        WHERE {where_clause} 
+        AND incident_zip IS NOT NULL 
+        AND borough IS NOT NULL
+        GROUP BY incident_zip, borough
     """
-    df_zip = run_query(zip_query)
+    df_zip_borough = run_query(zip_query)
     
-    # Convert zip codes to strings for categorical display
-    df_zip['incident_zip'] = df_zip['incident_zip'].astype(str)
+    # Convert zip codes to strings
+    df_zip_borough['incident_zip'] = df_zip_borough['incident_zip'].astype(str)
     
-    # Create horizontal bar chart (better for descending display)
+    # Find most common borough for each zip code
+    zip_to_borough = (
+        df_zip_borough
+        .groupby('incident_zip')
+        .apply(lambda x: x.loc[x['count'].idxmax(), 'borough'])
+        .reset_index()
+        .rename(columns={0: 'primary_borough'})
+    )
+    
+    # Get total counts per zip code
+    df_zip = (
+        df_zip_borough
+        .groupby('incident_zip')['count']
+        .sum()
+        .reset_index()
+        .sort_values('count', ascending=False)
+        .head(15)
+    )
+    
+    # Merge with borough info
+    df_zip = df_zip.merge(zip_to_borough, on='incident_zip', how='left')
+    
+    # Create combined label: "10025 (MANHATTAN)"
+    df_zip['zip_borough'] = df_zip['incident_zip'] + ' (' + df_zip['primary_borough'] + ')'
+    
+    # Create horizontal bar chart
     fig_zip = px.bar(
         df_zip,
         x='count',
-        y='incident_zip',
+        y='zip_borough',
         orientation='h',
         title='Top 15 Zip Codes',
-        labels={'count': 'Number of Complaints', 'incident_zip': 'Zip Code'}
+        labels={'count': 'Number of Complaints', 'zip_borough': 'Zip Code (Borough)'}
     )
-    # Keep descending order (highest at top)
-    fig_zip.update_layout(yaxis={'categoryorder': 'total ascending'})
+    
+    # Force y-axis to be categorical and keep descending order
+    fig_zip.update_layout(
+        yaxis={
+            'categoryorder': 'total descending',
+            'type': 'category'
+        }
+    )
+    
     st.plotly_chart(fig_zip, use_container_width=True)
 
 with col2:
