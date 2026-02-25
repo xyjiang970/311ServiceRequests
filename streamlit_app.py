@@ -264,7 +264,7 @@ with col1:
     # Force y-axis to be categorical and keep descending order
     fig_zip.update_layout(
         yaxis={
-            'categoryorder': 'total descending',
+            'categoryorder': 'total ascending',
             'type': 'category'
         }
     )
