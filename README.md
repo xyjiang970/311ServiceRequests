@@ -15,7 +15,7 @@ Rather than performing one-off analysis, the goal of this project is to demonstr
 Tech: AWS Lambda, EventBridge, S3, Athena, Python, Pandas, Parquet, Streamlit, SQL, REST APIs
 
 - Designed and implemented an end-to-end serverless data pipeline ingesting NYC public civic data via REST API and transforming it into an analytics-ready lakehouse dataset
-- Built incremental ingestion logic with pagination and retry handling to reliably process millions of records from a rate-limited API source
+- Built incremental ingestion logic with pagination and retry handling to reliably process 10,000 records from a rate-limited API source
 - Converted raw JSON into partitioned columnar Parquet data lake (S3) reducing query scan cost and improving query performance in Athena
 - Modeled query-optimized tables using schema-on-read architecture and external table definitions for serverless SQL analytics
 - Automated daily ingestion using event-driven orchestration (EventBridge → Lambda) enabling fully hands-off pipeline operation
@@ -49,7 +49,7 @@ The pipeline retrieves data from the NYC Open Data Socrata API using a custom in
 
 Features:
 
-- Configurable batch size
+- Offset pagination with configurable batch size
 - Rate limit handling & retry logic
 - SoQL server-side filtering
 - Incremental date-based ingestion
