@@ -10,18 +10,18 @@ This project implements a production-style serverless data platform that ingests
 
 The system continuously collects public civic data from the NYC Open Data platform and transforms it into a query-optimized analytical dataset using a modern lakehouse-style architecture built entirely on managed cloud services.
 
-Rather than performing one-off analysis, the goal of this project is to demonstrate how a data engineer would design a fully automated ingestion → storage → query → analytics workflow capable of scaling to tens of millions of records.
+Rather than performing one-off analysis, the goal of this project is to demonstrate how a data engineer would design a fully automated ingestion → storage → query → analytics workflow.
 
 Tech: AWS Lambda, EventBridge, S3, Athena, Python, Pandas, Parquet, Streamlit, SQL, REST APIs
 
 - Designed and implemented an end-to-end serverless data pipeline ingesting NYC public civic data via REST API and transforming it into an analytics-ready lakehouse dataset
-- Built incremental ingestion logic with pagination and retry handling to reliably process tens of millions of records from a rate-limited API source
+- Built incremental ingestion logic with pagination and retry handling to reliably process millions of records from a rate-limited API source
 - Converted raw JSON into partitioned columnar Parquet data lake (S3) reducing query scan cost and improving query performance in Athena
 - Modeled query-optimized tables using schema-on-read architecture and external table definitions for serverless SQL analytics
 - Automated daily ingestion using event-driven orchestration (EventBridge → Lambda) enabling fully hands-off pipeline operation
 - Developed an interactive Streamlit analytics dashboard for geospatial and trend analysis of city service complaints
 - Implemented cost-efficient analytics workflow leveraging per-query pricing in Athena instead of persistent compute infrastructure
-- Demonstrated production data engineering patterns including idempotent runs, partition pruning, and scalable storage design
+- Demonstrated production data engineering patterns including partition pruning and scalable storage design
 
 ## Architecture
 
@@ -49,7 +49,6 @@ The pipeline retrieves data from the NYC Open Data Socrata API using a custom in
 
 Features:
 
-- Offset pagination for >35M records
 - Configurable batch size
 - Rate limit handling & retry logic
 - SoQL server-side filtering
